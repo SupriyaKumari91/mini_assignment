@@ -29,25 +29,39 @@ public class MovieController {
 	public ResponseEntity<List<Movies>> sortedAscComments(@RequestParam("English_Titles") String englishTitles
 			,@RequestParam("User_Ratings") String userRatings,@RequestParam("X-Auth-Token") String authToken) throws ResourceNotFoundException{
 		logger.info("get sorted movie desc ...!");
+		logger.info("Retrieve all the movies acccording to ratings..");
+		Long startingTime = System.currentTimeMillis();
 		List<Movies> movies = movieService.sortedDescComments(englishTitles,userRatings,authToken);
-		return new ResponseEntity<>(movies, new HttpHeaders(), HttpStatus.OK);
+		return new ResponseEntity<>(movies, timeTakenToExecuteResponseHeader(startingTime), HttpStatus.OK);
 	}
 	
 	@GetMapping("/movies/details")
-	public ResponseEntity<List<Movies>> getMovieDirectedByGivenDirector(@RequestParam("Director") String director
+	public ResponseEntity<List<String>> getMovieDirectedByGivenDirector(@RequestParam("Director") String director
 			,@RequestParam("Start-Year-Range") String startYearRange,@RequestParam("End-Year-Range") String endYearRange,
 			@RequestParam("X-Auth-Token") String authToken) throws ResourceNotFoundException{
 		logger.info("get movie details ...!");
-		List<Movies> movies = movieService.getMoviesDetails(director,startYearRange,endYearRange,authToken);
-		return new ResponseEntity<>(movies, new HttpHeaders(), HttpStatus.OK);
+		logger.info("Retrieve all movie titles for given director and made within the duration ..");
+		Long startingTime = System.currentTimeMillis();
+		List<String> movies = movieService.getMoviesDetails(director,startYearRange,endYearRange,authToken);
+		return new ResponseEntity<>(movies, timeTakenToExecuteResponseHeader(startingTime), HttpStatus.OK);
 	}
 	
 	@GetMapping("/movies/highest/budget")
 	public ResponseEntity<List<Movies>> getHighestBudgetTitles(@RequestParam("Year") String year
 			,@RequestParam("Country") String country,@RequestParam("X-Auth-Token") String authToken) throws ResourceNotFoundException{
 		logger.info("get highest budget movies ...!");
+		logger.info("Retrieve all highest budget movies in given time..");
+		Long startingTime = System.currentTimeMillis();
 		List<Movies> movies = movieService.highestBudgetMovies(year,country,authToken);
-		return new ResponseEntity<>(movies, new HttpHeaders(), HttpStatus.OK);
+		return new ResponseEntity<>(movies, timeTakenToExecuteResponseHeader(startingTime), HttpStatus.OK);
 	}
 
+	
+	private HttpHeaders timeTakenToExecuteResponseHeader(Long startTimeMS) {
+		Long timeElapsed = System.currentTimeMillis() - startTimeMS;
+		logger.info("Time to execute request = {}", timeElapsed);
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("X-TIME-TO_EXECUTE", String.valueOf(timeElapsed));
+		return headers;
+	}
 }
